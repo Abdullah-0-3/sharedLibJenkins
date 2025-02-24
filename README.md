@@ -1,1 +1,1 @@
-# sharedLibJenkins
+# Jenkins Shared Libraries
