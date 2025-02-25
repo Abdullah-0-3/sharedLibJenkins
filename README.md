@@ -38,4 +38,12 @@ pipeline {
     }
 }
 ```
+
+> * Replace placeholder values (e.g., `your-repo-url`, `your-image-name`) with your actual values.
+> * Refer to the individual `.groovy` files in the `vars/` directory for specific parameter details.
+
+## Contributing
+
+Feel free to contribute to this library by submitting pull requests.
+
 ---
