@@ -33,7 +33,7 @@ def call(String to, List<String> attachments = []) {
                 <p>You can check the build details by clicking the button below:</p>
                 <a href="${env.BUILD_URL}" class="button">View Pipeline</a>
             </div>
-            <div class="footer">© 2025 DevOps Shack | Automated Notification</div>
+            <div class="footer">Automated Notification | Jenkins</div>
         </div>
     </body>
     </html>
