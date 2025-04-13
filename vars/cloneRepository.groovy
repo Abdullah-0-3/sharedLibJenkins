@@ -1,4 +1,5 @@
-def call(String repoUrl, String branch = 'master') {
+def call(Map config = [:]) {
+    def branch = config.branch ?: 'master'
     def repoUrl = config.repoUrl ?: error("Repository URL not provided")
     
     echo "Cloning Repository: $repoUrl"
