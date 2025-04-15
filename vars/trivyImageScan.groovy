@@ -5,7 +5,7 @@ def call(Map config = [:]) {
     echo "Scanning Docker image..."
     
     sh """
-        trivy image --format table ${imageName}:${imageTag} > trivy-report.txt
+        trivy image --format table ${imageName}:${imageTag} > trivy-image-report.txt
     """
     
     echo "Docker image scanned successfully"
