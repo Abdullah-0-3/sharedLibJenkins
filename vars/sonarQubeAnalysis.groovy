@@ -1,20 +1,18 @@
 def call(Map config = [:]) {
-    def sonarQubeToken = config.sonarQubeToken ?: error("SonarQube token is required")
-    def sonarQubeUrl = config.sonarQubeUrl ?: error("SonarQube URL is required")
+    def sonarQubeTokenName = config.sonarQubeTokenName ?: error("SonarQube token name is required")
     def sonarQubeProjectKey = config.sonarQubeProjectKey ?: error("SonarQube project key is required")
     def sonarQubeProjectName = config.sonarQubeProjectName ?: error("SonarQube project name is required")
     def soanrQubeInstallationName = config.sonarQubeInstallationName ?: error("SonarQube installation name is required")
-    def sonarQubeCredentialsId = config.sonarQubeCredentialsId ?: error("SonarQube credentials ID is required")
+    def sonarQubeScannerHome = config.sonarQubeScannerHome ?: error("SonarQube scanner home is required")
 
     echo "Running SonarQube analysis..."
 
-    withSonarQubeEnv(credentialsId: $sonarQubeCredentialsId, installationName: $soanrQubeInstallationName) {
+    withSonarQubeEnv(credentialsId: $sonarQubeTokenName, installationName: $sonarQubeInstallationName) {
         sh """
-            sonar-scanner \
+            ${sonarQubeScannerHome}/bin/sonar-scanner \
                 -Dsonar.projectKey=${sonarQubeProjectKey} \
                 -Dsonar.projectName=${sonarQubeProjectName} \
-                -Dsonar.host.url=${sonarQubeUrl} \
-                -Dsonar.login=${sonarQubeToken}
+                -X
         """
     }
 
