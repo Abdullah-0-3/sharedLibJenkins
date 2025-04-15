@@ -1,49 +1,35 @@
-// Email Notification
+def call(Map config = [:]) {
+    def recipients = config.recipients ?: error("Recipients not provided")
+    def attachments = config.attachments ?: ''
+    def stageName = config.stageName ?: 'Unknown Stage'
 
-def call(String to, List<String> attachments = []) {
-    def status = currentBuild.result ?: 'SUCCESS' 
-    def color = (status == 'SUCCESS') ? '#28a745' : '#dc3545'
-    def icon = (status == 'SUCCESS') ? '✅' : '❌'
-    def buttonColor = (status == 'SUCCESS') ? '#28a745' : '#dc3545'
-    def subjectStatus = (status == 'SUCCESS') ? 'SUCCESS' : 'FAILURE'
-    def projectName = env.JOB_BASE_NAME 
+    // Automatically get project name from Jenkins environment
+    def projectName = env.JOB_NAME ?: 'Unnamed Project'
+    def buildNumber = env.BUILD_NUMBER ?: 'N/A'
+    def buildUrl = env.BUILD_URL ?: '#'
 
-    // Convert the list to a comma-separated string for Jenkins email plugin
-    def attachmentsPattern = attachments.join(',')
-
-    def emailBody = """
-    <!DOCTYPE html>
+    def subject = "[${projectName}] - Stage: ${stageName}"
+    def body = """
     <html>
-    <head>
-        <style>
-            body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
-            .container { max-width: 600px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
-            .header { background: ${color}; color: white; padding: 15px; font-size: 18px; font-weight: bold; text-align: center; border-radius: 5px 5px 0 0; }
-            .content { padding: 20px; color: #333; line-height: 1.6; }
-            .footer { text-align: center; font-size: 12px; color: #777; margin-top: 20px; }
-            .button { display: inline-block; padding: 10px 20px; margin-top: 20px; background: ${buttonColor}; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="header">${icon} Jenkins Pipeline Execution - ${subjectStatus}</div>
-            <div class="content">
-                <p><strong>Project Name:</strong> ${projectName}</p>
-                <p>The Jenkins pipeline for <strong>${projectName}</strong> has ${status == 'SUCCESS' ? 'been successfully executed.' : 'encountered a failure. Please review the logs and investigate the issue.'}</p>
-                <p>You can check the build details by clicking the button below:</p>
-                <a href="${env.BUILD_URL}" class="button">View Pipeline</a>
-            </div>
-            <div class="footer">Automated Notification | Jenkins @ Abdullah</div>
-        </div>
+    <body style="background-color: #e0f7ff; font-family: Arial, sans-serif; padding: 20px;">
+        <h2 style="color: #007acc;">Jenkins Pipeline Notification</h2>
+        <p><strong>Project:</strong> ${projectName}</p>
+        <p><strong>Build Number:</strong> #${buildNumber}</p>
+        <p><strong>Latest Stage:</strong> ${stageName}</p>
+        <p style="margin-top: 20px;">This is to inform you that the Jenkins pipeline is <strong>configured</strong> and running.</p>
+        <p>🔗 <a href="${buildUrl}" style="color: #007acc;">View Build in Jenkins</a></p>
+
+        <hr style="margin-top: 30px; border: none; border-top: 1px solid #b3e0ff;">
+        <p style="font-size: 12px; color: #777;">Automated message from Jenkins Shared Library • Stay productive ✨</p>
     </body>
     </html>
     """
 
     emailext(
-        subject: "${icon} ${subjectStatus} - Jenkins Pipeline: ${projectName}",
-        body: emailBody,
-        attachmentsPattern: attachmentsPattern,
+        to: recipients,
+        subject: subject,
+        body: body,
         mimeType: 'text/html',
-        to: to
+        attachmentsPattern: attachments
     )
 }
