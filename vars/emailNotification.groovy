@@ -1,12 +1,16 @@
 def call(Map config = [:]) {
     def recipients = config.recipients ?: error("Recipients not provided")
-    def attachments = config.attachments ?: ''
+    def attachmentsInput = config.attachments ?: ''
     def stageName = config.stageName ?: 'Unknown Stage'
 
-    // Automatically get project name from Jenkins environment
     def projectName = env.JOB_NAME ?: 'Unnamed Project'
     def buildNumber = env.BUILD_NUMBER ?: 'N/A'
     def buildUrl = env.BUILD_URL ?: '#'
+
+    // 🛠 Convert list of attachments to comma-separated string
+    def attachmentsPattern = attachmentsInput instanceof List
+        ? attachmentsInput.join(',')
+        : attachmentsInput
 
     def subject = "[${projectName}] - Stage: ${stageName}"
     def body = """
@@ -30,6 +34,6 @@ def call(Map config = [:]) {
         subject: subject,
         body: body,
         mimeType: 'text/html',
-        attachmentsPattern: attachments
+        attachmentsPattern: attachmentsPattern
     )
 }
