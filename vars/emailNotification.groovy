@@ -1,74 +1,50 @@
 def call(Map config = [:]) {
-    def recipients = config.recipients ?: error("Recipients not provided")
-    def attachmentsInput = config.attachments ?: ''
-    def stageName = config.stageName ?: 'Unknown Stage'
+    def status = currentBuild.result ?: 'SUCCESS' 
+    def color = (status == 'SUCCESS') ? '#28a745' : '#dc3545'
+    def icon = (status == 'SUCCESS') ? '✅' : '❌'
+    def buttonColor = (status == 'SUCCESS') ? '#28a745' : '#dc3545'
+    def subjectStatus = (status == 'SUCCESS') ? 'SUCCESS' : 'FAILURE'
+    def projectName = env.JOB_BASE_NAME 
 
-    def projectName = env.JOB_NAME ?: 'Unnamed Project'
-    def buildNumber = env.BUILD_NUMBER ?: 'N/A'
-    def buildUrl = env.BUILD_URL ?: '#'
+    def to = config.to ?: error("Recipient email address is required")
+    def attachments = config.attachments ?: [] // List of attachments
 
-    // 🛠 Convert list of attachments to a comma-separated string, 
-    // ensuring the correct path for attachments
-    def attachmentsPattern = attachmentsInput instanceof List 
-        ? attachmentsInput.collect { "path/to/files/${it}" }.join(',')
-        : attachmentsInput
+    // Convert the list to a comma-separated string for Jenkins email plugin
+    def attachmentsPattern = attachments.join(',')
 
-    // Debugging: Log the attachments pattern
-    echo "Attachments Pattern: ${attachmentsPattern}"
-
-    def subject = "[${projectName}] - Stage: ${stageName}"
-    def body = """
+    def emailBody = """
+    <!DOCTYPE html>
     <html>
     <head>
         <style>
-            body {
-                background-color: #f7f9fc; /* Light background color */
-                font-family: 'Poppins', sans-serif; /* Using Poppins font */
-                padding: 20px;
-            }
-            h2 {
-                color: #007acc; /* Sky blue for headers */
-            }
-            p {
-                color: #333; /* Dark text for better readability */
-            }
-            a {
-                color: #007acc; /* Sky blue for links */
-                text-decoration: none; /* Remove underline from links */
-            }
-            a:hover {
-                text-decoration: underline; /* Underline links on hover */
-            }
-            hr {
-                margin-top: 30px; 
-                border: none; 
-                border-top: 1px solid #b3e0ff; /* Light sky blue border */
-            }
-            .footer {
-                font-size: 12px; 
-                color: #777; 
-            }
+            body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
+            .container { max-width: 600px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+            .header { background: ${color}; color: white; padding: 15px; font-size: 18px; font-weight: bold; text-align: center; border-radius: 5px 5px 0 0; }
+            .content { padding: 20px; color: #333; line-height: 1.6; }
+            .footer { text-align: center; font-size: 12px; color: #777; margin-top: 20px; }
+            .button { display: inline-block; padding: 10px 20px; margin-top: 20px; background: ${buttonColor}; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; }
         </style>
     </head>
     <body>
-        <h2>Jenkins Pipeline Notification</h2>
-        <p><strong>Project:</strong> ${projectName}</p>
-        <p><strong>Build Number:</strong> #${buildNumber}</p>
-        <p><strong>Latest Stage:</strong> ${stageName}</p>
-        <p style="margin-top: 20px;">This is to inform you that the Jenkins pipeline is <strong>configured</strong> and running.</p>
-        <p>🔗 <a href="${buildUrl}">View Build in Jenkins</a></p>
-
-        <hr>
-        <p class="footer">Automated message from Jenkins Shared Library • Stay productive ✨</p>
+        <div class="container">
+            <div class="header">${icon} Jenkins Pipeline Execution - ${subjectStatus}</div>
+            <div class="content">
+                <p><strong>Project Name:</strong> ${projectName}</p>
+                <p>The Jenkins pipeline for <strong>${projectName}</strong> has ${status == 'SUCCESS' ? 'been successfully executed.' : 'encountered a failure. Please review the logs and investigate the issue.'}</p>
+                <p>You can check the build details by clicking the button below:</p>
+                <a href="${env.BUILD_URL}" class="button">View Pipeline</a>
+            </div>
+            <div class="footer">Automated Notification | Jenkins</div>
+        </div>
     </body>
     </html>
     """
 
     emailext(
-        to: recipients,
-        subject: subject,
-        body: body,
+        subject: "${icon} ${subjectStatus} - Jenkins Pipeline: ${projectName}",
+        body: emailBody,
+        attachmentsPattern: attachments,
         mimeType: 'text/html',
-        attachmentsPattern: attachmentsPattern
+        to: to
     )
 }
