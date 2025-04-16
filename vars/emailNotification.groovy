@@ -43,7 +43,7 @@ def call(Map config = [:]) {
     emailext(
         subject: "${icon} ${subjectStatus} - Jenkins Pipeline: ${projectName}",
         body: emailBody,
-        attachmentsPattern: attachments,
+        attachmentsPattern: attachmentsPattern,
         mimeType: 'text/html',
         to: to
     )
