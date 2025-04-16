@@ -1,13 +1,12 @@
-def call(Map config = [:]) {
+// Email Notification
+
+def call(String to, List<String> attachments = []) {
     def status = currentBuild.result ?: 'SUCCESS' 
     def color = (status == 'SUCCESS') ? '#28a745' : '#dc3545'
     def icon = (status == 'SUCCESS') ? '✅' : '❌'
     def buttonColor = (status == 'SUCCESS') ? '#28a745' : '#dc3545'
     def subjectStatus = (status == 'SUCCESS') ? 'SUCCESS' : 'FAILURE'
     def projectName = env.JOB_BASE_NAME 
-
-    def to = config.to ?: error("Recipient email address is required")
-    def attachments = config.attachments ?: [] // List of attachments
 
     // Convert the list to a comma-separated string for Jenkins email plugin
     def attachmentsPattern = attachments.join(',')
@@ -34,7 +33,7 @@ def call(Map config = [:]) {
                 <p>You can check the build details by clicking the button below:</p>
                 <a href="${env.BUILD_URL}" class="button">View Pipeline</a>
             </div>
-            <div class="footer">Automated Notification | Jenkins</div>
+            <div class="footer">© 2025 DevOps Shack | Automated Notification</div>
         </div>
     </body>
     </html>
